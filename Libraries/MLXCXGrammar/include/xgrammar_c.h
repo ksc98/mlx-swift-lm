@@ -195,6 +195,18 @@ XGStatus xg_compile_json_schema(
 );
 
 /*
+ * `xg_compile_json_schema` with compact JSON: no whitespace between
+ * tokens (`any_whitespace=false`) and the separators `,` and `:` (no
+ * spaces), as xgrammar's Python `compile_json_schema(any_whitespace=False,
+ * separators=(",", ":"))` compiles it.
+ */
+XGStatus xg_compile_json_schema_compact(
+    XGGrammarCompiler *compiler,
+    const char *schema_json,
+    XGCompiledGrammar **out_compiled
+);
+
+/*
  * Release a handle returned by `xg_compile_json_schema`. Safe to call
  * with a NULL pointer.
  */

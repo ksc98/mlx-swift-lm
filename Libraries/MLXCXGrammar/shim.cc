@@ -322,6 +322,27 @@ XGStatus xg_compile_json_schema(
     );
 }
 
+XGStatus xg_compile_json_schema_compact(
+    XGGrammarCompiler *compiler,
+    const char *schema_json,
+    XGCompiledGrammar **out_compiled
+) {
+    if (compiler == nullptr) return XG_ERR_INTERNAL;
+    return CompileSchemaInto(
+        schema_json,
+        out_compiled,
+        XG_ERR_INVALID_JSON_SCHEMA,
+        [&](const std::string &s) {
+            return compiler->inner.CompileJSONSchema(
+                s,
+                /*any_whitespace=*/false,
+                /*indent=*/std::nullopt,
+                std::make_optional(std::make_pair(std::string(","), std::string(":")))
+            );
+        }
+    );
+}
+
 void xg_compiled_grammar_free(XGCompiledGrammar *compiled) {
     if (compiled == nullptr) return;
     delete compiled;

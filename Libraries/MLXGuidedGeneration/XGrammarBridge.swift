@@ -248,11 +248,16 @@ public final class GrammarConstraint: @unchecked Sendable {
     ///     FF strings back into token ids. Must be the same tokenizer
     ///     whose vocab built `tokenizer`. Ignored when `fastForward`
     ///     is `false`.
+    ///   - compact: When `true`, the grammar allows no whitespace between
+    ///     JSON tokens and uses the separators `,` and `:` (xgrammar's
+    ///     `any_whitespace=false`, `separators=(",", ":")`). Defaults to
+    ///     `false`: xgrammar's defaults, any whitespace.
     public init(
         tokenizer: GrammarTokenizer,
         jsonSchema: String,
         fastForward: Bool = false,
-        hostTokenizer: (any Tokenizer)? = nil
+        hostTokenizer: (any Tokenizer)? = nil,
+        compact: Bool = false
     ) throws {
         self.tokenizer = tokenizer
         self.vocabSize = Int32(tokenizer.vocabSize)
@@ -272,7 +277,9 @@ public final class GrammarConstraint: @unchecked Sendable {
 
         var compiledPtr: OpaquePointer?
         let compileStatus = jsonSchema.withCString { schemaPtr in
-            xg_compile_json_schema(compilerHandle, schemaPtr, &compiledPtr)
+            compact
+                ? xg_compile_json_schema_compact(compilerHandle, schemaPtr, &compiledPtr)
+                : xg_compile_json_schema(compilerHandle, schemaPtr, &compiledPtr)
         }
         guard compileStatus == XG_OK, let compiledHandle = compiledPtr else {
             xg_grammar_compiler_free(compilerHandle)
